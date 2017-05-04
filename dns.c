@@ -77,9 +77,8 @@ int main(int argc, char **argv) {
     int clientlen; /* byte size of client's address */
     struct sockaddr_in6 serveraddr; /* server's addr */
     struct sockaddr_in6 clientaddr; /* client addr */
-    struct hostent *hostp; /* client host info */
     unsigned char buf[BUFSIZE]; /* message buf */
-    char *hostaddrp; /* dotted decimal host addr string */
+    unsigned char clientip[INET6_ADDRSTRLEN]; /* dotted decimal host addr string */
     int optval; /* flag value for setsockopt */
     int n; /* message byte size */
     
@@ -126,7 +125,7 @@ int main(int argc, char **argv) {
     */
     bzero((char *) &serveraddr, sizeof(serveraddr));
     serveraddr.sin6_family = AF_INET6;
-    serveraddr.sin6_addr.s6_addr = htonl(INADDR_ANY);
+    serveraddr.sin6_addr = in6addr_any;
     serveraddr.sin6_port = htons((unsigned short)portno);
     
     /* 
@@ -152,17 +151,10 @@ int main(int argc, char **argv) {
             (struct sockaddr *) &clientaddr, &clientlen);
         printf("------------------\n");
         if (n < 0) error("ERROR in recvfrom");
+
+        inet_ntop(AF_INET6, &(clientaddr.sin6_addr), clientip, sizeof(clientip));
         
-        /* 
-        * gethostbyaddr: determine who sent the datagram
-        */
-        hostp = gethostbyaddr((const char *)&clientaddr.sin6_addr.s6_addr, 
-                sizeof(clientaddr.sin6_addr.s6_addr), AF_INET);
-        /* NOTE: SEE HERE? THIS IS WHERE I STOPPED */
-        hostaddrp = inet_ntop(clientaddr.sin6_addr);
-        if (hostaddrp == NULL) error("ERROR on inet_ntoa\n");
-        
-        printf("server received %d byte datagram from %s\n", n, hostaddrp);
+        printf("server received %d byte datagram from %s\n", n, strncmp(clientip, "::ffff:", 7)?clientip:&clientip[7]);
         hexDump("recv data", buf, n);
         
         test = (struct dns_request *)buf;
