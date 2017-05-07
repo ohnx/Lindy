@@ -77,6 +77,18 @@ hashmap *hashmap_new() {
     return ret;
 }
 
+static char *ansi_strdup(const char *src) {
+    char *str;
+    size_t len;
+    
+    len = strlen(src);
+    str = malloc(len + 1);
+
+    if (str) memcpy(str, src, len + 1);
+    
+    return str;
+}
+
 void hashmap_put(hashmap *in, const char *key, void *value) {
     unsigned char crc8;
     hashmap_entry_list *hel;
@@ -101,7 +113,7 @@ void hashmap_put(hashmap *in, const char *key, void *value) {
     /* jump to end of hashmap entry list */
     he = &hel->values[hel->vlen-1];
     
-    he->key = strdup(key);
+    he->key = ansi_strdup(key);
     he->value = value;
     
     /* success */

@@ -42,7 +42,7 @@ enum dns_record_type str_to_code(const char *in) {
     return DNS_RECORD_UNKNOWN;
 }
 
-// convert DNS-style string to c-string
+/* convert DNS-style string to c-string */
 char *dns_str_convert(void *in) {
     unsigned int length = 0;
     char *ptr = (char *)in;
@@ -54,7 +54,7 @@ char *dns_str_convert(void *in) {
     }
 
     tmp = ret = calloc(length+1, sizeof(char));
-    ptr = (unsigned char *)in;
+    ptr = (char *)in;
 
     while (*ptr != 0) {
         memcpy(tmp, ptr+1, *ptr);
@@ -65,19 +65,19 @@ char *dns_str_convert(void *in) {
     return ret;
 }
 
-// convert c-style string to dns-style string
+/* convert c-style string to dns-style string */
 void *str_dns_convert(unsigned char *in) {
-    unsigned int length = strlen(in) + 1;
+    unsigned int length = strlen((char *)in) + 1;
     unsigned char *ret, *tmp, *ptr, *dlo;
 
     tmp = ret = calloc(length, sizeof(char));
-    ptr = (unsigned char *)in;
+    ptr = in;
 
     while (*ptr != 0) {
-        dlo = strchr(ptr, '.');
+        dlo = (unsigned char *)strchr((char *)ptr, '.');
 
         if (dlo == NULL) {
-            // does not end with a . (root)
+            /* does not end with a . (root) */
             break;
         }
 
