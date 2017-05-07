@@ -15,6 +15,7 @@
 #include "miscutil.h"
 #include "dns_parse.h"
 #include "response_maker.h"
+#include "query_records.h"
 #include "hashmap.h"
 
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
@@ -92,6 +93,14 @@ int main(int argc, char **argv) {
      */
     h = hashmap_new();
     hashmap_put(h, "test", (void *)"meme");
+    if (1) {
+        struct dns_record myRec;
+        myRec.rtype = DNS_RECORD_A;
+        myRec.data_len = sizeof(struct dns_answer_a);
+        myRec.data = calloc(1, sizeof(struct dns_answer_a));
+        make_response_bytes_for_a(myRec.data, 3111756784);
+        add_record(h, "test.masonx.ca", myRec);
+    }
     
     /* 
     * main loop: wait for a datagram, then echo it
@@ -155,7 +164,7 @@ int main(int argc, char **argv) {
         
         if ((test->header).num_questions == 1) {
             unsigned char *myNewBytes;
-            unsigned int ip4;
+            struct dns_record testrecord;
             unsigned char ip6[16];
             char *response = "\024ohnx's DNS responder\030See d.masonx.ca for info";
             int resplen = strlen(response);
@@ -166,8 +175,10 @@ int main(int argc, char **argv) {
                     printf("Replying!\n");
                     n = 16 + strlen(temp) + 1;
                     
+                    testrecord = get_record(h, "test.masonx.ca", DNS_RECORD_A);
+                    
                     /* copy memory + response stub for A */
-                    myNewBytes = calloc(n+sizeof(struct dns_answer_a), sizeof(unsigned char));
+                    myNewBytes = calloc(n+testrecord.data_len, sizeof(unsigned char));
                     test = (struct dns_request *)myNewBytes;
                     
                     /* switch back to endian-swapped code */
@@ -184,14 +195,10 @@ int main(int argc, char **argv) {
                     (test->header).num_authority = 0;
                     (test->header).num_additional = 0;
                     
-                    if (strstr(temp, "0x2f.cf") != NULL) ip4 = 918406927;
-                    else ip4 = 3111756784;
+                    memcpy(myNewBytes+n, testrecord.data, testrecord.data_len);
                     
-                    /* throwin the ip response at the right spot */
-                    make_response_bytes_for_a(myNewBytes+n, ip4);
-            
                     /* for ip response */
-                    n += sizeof(struct dns_answer_a);
+                    n += testrecord.data_len;
                     
                     /* make_response_bytes_for_ip */
                     hexDump("send data", myNewBytes, n);
