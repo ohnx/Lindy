@@ -1,7 +1,7 @@
 #include "dns_parse.h"
 
 const char *code_to_str(enum dns_record_type in) {
-    switch(in) {
+    switch (in) {
     case DNS_RECORD_A: return "A";
     case DNS_RECORD_NS: return "NS";
     case DNS_RECORD_CNAME: return "CNAME";
@@ -15,6 +15,31 @@ const char *code_to_str(enum dns_record_type in) {
     case DNS_RECORD_ANY: return "ANY";
     default: return "UNKNOWN";
     }
+}
+
+enum dns_record_type str_to_code(const char *in) {
+    switch (in[0]) {
+    case 'A':
+        switch (in[1]) {
+        case '\0': return DNS_RECORD_A;
+        case 'A': return DNS_RECORD_AAAA;
+        case 'N': return DNS_RECORD_ANY;
+        }
+        break;
+    case 'C': return DNS_RECORD_CNAME;
+    case 'M': return DNS_RECORD_MX;
+    case 'N': return DNS_RECORD_NS;
+    case 'P': return DNS_RECORD_PTR;
+    case 'R': return DNS_RECORD_RRSIG;
+    case 'S': 
+        switch (in[1]) {
+        case 'R': return DNS_RECORD_SRV;
+        case 'O': return DNS_RECORD_SOA;
+        }
+        break;
+    case 'T': return DNS_RECORD_TXT;
+    }
+    return DNS_RECORD_UNKNOWN;
 }
 
 // convert DNS-style string to c-string

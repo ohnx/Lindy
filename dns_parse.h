@@ -4,31 +4,31 @@
 #include <stdlib.h>
 
 struct __attribute__((__packed__)) dns_header {
-    // transaction id 2 bytes
+    /* transaction id 2 bytes */
     unsigned short transaction_id;
     
-    // flags
-    //x....... ........ = Response
-    //.xxxx... ........ = Opcode
-    //......x. ........ = Truncated
-    //.......x ........ = Recursion desired
-    //........ .x...... = Z: reserved (0)
-    //........ ...x.... = Non-authenticated data OK
+    /* flags */
+    /* x....... ........ = Response */
+    /* .xxxx... ........ = Opcode */
+    /* ......x. ........ = Truncated */
+    /* .......x ........ = Recursion desired */
+    /* ........ .x...... = Z: reserved (0) */
+    /* ........ ...x.... = Non-authenticated data OK */
     unsigned short flags;
     
-    // # of questions
+    /* # of questions */
     unsigned short num_questions;
     
-    // # of answers
+    /* # of answers */
     unsigned short num_answers;
     
-    // # authorities
+    /* # authorities */
     unsigned short num_authority;
     
-    // # additional stuff
+    /* # additional stuff */
     unsigned short num_additional;
     
-    // questions/answers/etc. follow...
+    /* questions/answers/etc. follow... */
 };
 
 struct __attribute__((__packed__)) dns_request {
@@ -37,6 +37,7 @@ struct __attribute__((__packed__)) dns_request {
 };
 
 enum dns_record_type {
+    DNS_RECORD_UNKNOWN = 0,
     DNS_RECORD_A = 1,
     DNS_RECORD_NS = 2,
     DNS_RECORD_CNAME = 5,
@@ -47,7 +48,7 @@ enum dns_record_type {
     DNS_RECORD_AAAA = 28,
     DNS_RECORD_SRV = 33,
     DNS_RECORD_RRSIG = 46,
-    DNS_RECORD_ANY = 255,
+    DNS_RECORD_ANY = 255
 };
 
 struct __attribute__((__packed__)) dns_answer {
@@ -60,6 +61,7 @@ struct __attribute__((__packed__)) dns_answer {
 };
 
 const char *code_to_str(enum dns_record_type in);
+enum dns_record_type str_to_code(const char *in);
 char *dns_str_convert(void *in);
 void *str_dns_convert(unsigned char *in);
 
